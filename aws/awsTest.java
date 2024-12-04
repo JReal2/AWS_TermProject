@@ -331,7 +331,7 @@ public class awsTest {
 		DescribeImagesRequest request = new DescribeImagesRequest();
 		ProfileCredentialsProvider credentialsProvider = new ProfileCredentialsProvider();
 
-		request.getFilters().add(new Filter().withName("name").withValues("htcondor-slave-image"));
+		request.getFilters().add(new Filter().withName("owner-id").withValues("116981805751"));
 		request.setRequestCredentialsProvider(credentialsProvider);
 
 		DescribeImagesResult results = ec2.describeImages(request);
