@@ -16,26 +16,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.Reservation;
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
-import com.amazonaws.services.ec2.model.DescribeRegionsResult;
-import com.amazonaws.services.ec2.model.Region;
-import com.amazonaws.services.ec2.model.AvailabilityZone;
-import com.amazonaws.services.ec2.model.DryRunSupportedRequest;
-import com.amazonaws.services.ec2.model.StopInstancesRequest;
-import com.amazonaws.services.ec2.model.StartInstancesRequest;
-import com.amazonaws.services.ec2.model.InstanceType;
-import com.amazonaws.services.ec2.model.RunInstancesRequest;
-import com.amazonaws.services.ec2.model.RunInstancesResult;
-import com.amazonaws.services.ec2.model.RebootInstancesRequest;
-import com.amazonaws.services.ec2.model.RebootInstancesResult;
-import com.amazonaws.services.ec2.model.DescribeImagesRequest;
-import com.amazonaws.services.ec2.model.DescribeImagesResult;
-import com.amazonaws.services.ec2.model.Image;
-import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.*;
 import com.jcraft.jsch.*;
 
 public class awsTest {
@@ -72,16 +53,17 @@ public class awsTest {
 		{
 			System.out.println("                                                            ");
 			System.out.println("                                                            ");
-			System.out.println("------------------------------------------------------------");
+			System.out.println("----------------------------------------------------------------");
 			System.out.println("           Amazon AWS Control Panel using SDK               ");
-			System.out.println("------------------------------------------------------------");
-			System.out.println("  1. list instance                2. available zones        ");
-			System.out.println("  3. start instance               4. available regions      ");
-			System.out.println("  5. stop instance                6. create instance        ");
-			System.out.println("  7. reboot instance              8. list images            ");
-			System.out.println("  9. check condor status          10. send command          ");
-			System.out.println("                                 99. quit                   ");
-			System.out.println("------------------------------------------------------------");
+			System.out.println("----------------------------------------------------------------");
+			System.out.println("  1. list instance                2. available zones            ");
+			System.out.println("  3. start instance               4. available regions          ");
+			System.out.println("  5. stop instance                6. create instance            ");
+			System.out.println("  7. reboot instance              8. list images                ");
+			System.out.println("  9. check condor status         10. send command               ");
+			System.out.println(" 11. list security group                                        ");
+			System.out.println("                                 99. quit                       ");
+			System.out.println("----------------------------------------------------------------");
 
 			System.out.print("Enter an integer: ");
 
@@ -171,6 +153,12 @@ public class awsTest {
 						sendCommand(instance_id, command);
 				}
 				break;
+
+			case 11:
+				listSecurityGroups();
+				break;
+
+
 
 			case 99:
 				System.out.println("bye!");
@@ -491,4 +479,32 @@ public class awsTest {
 		}
 	}
 
+	public static void listSecurityGroups() {
+
+		System.out.println("Listing security groups....");
+		boolean done = false;
+
+		DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest();
+
+		while(!done) {
+			DescribeSecurityGroupsResult response = ec2.describeSecurityGroups(request);
+
+			for(SecurityGroup securityGroup : response.getSecurityGroups()) {
+				System.out.printf(
+						"[id] %s, " +
+								"[name] %s, " +
+								"[description] %s, ",
+						securityGroup.getGroupId(),
+						securityGroup.getGroupName(),
+						securityGroup.getDescription());
+				System.out.println();
+			}
+
+			request.setNextToken(response.getNextToken());
+
+			if(response.getNextToken() == null) {
+				done = true;
+			}
+		}
+	}
 }
