@@ -79,7 +79,7 @@ public class awsTest {
 			System.out.println("  3. start instance               4. available regions      ");
 			System.out.println("  5. stop instance                6. create instance        ");
 			System.out.println("  7. reboot instance              8. list images            ");
-			System.out.println("  9. check condor status                                    ");
+			System.out.println("  9. check condor status          10. send command          ");
 			System.out.println("                                 99. quit                   ");
 			System.out.println("------------------------------------------------------------");
 
@@ -156,6 +156,20 @@ public class awsTest {
 
 				if(!instance_id.trim().isEmpty())
 					getCondorStatus(instance_id);
+				break;
+
+			case 10:
+				System.out.print("Enter instance id: ");
+				if(id_string.hasNext())
+					instance_id = id_string.nextLine();
+
+				if(!instance_id.trim().isEmpty()) {
+					System.out.print("Enter command: ");
+					String command = id_string.nextLine();
+
+					if(!command.trim().isEmpty())
+						sendCommand(instance_id, command);
+				}
 				break;
 
 			case 99:
@@ -360,6 +374,66 @@ public class awsTest {
 		String user = "ec2-user";
 		String keyPath = "jrcloud.pem";
 		String command = "condor_status";
+
+		final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+
+		try {
+			DescribeInstancesRequest request = new DescribeInstancesRequest().withInstanceIds(instance_id);
+			DescribeInstancesResult response = ec2.describeInstances(request);
+
+			String publicIp = "";
+			for (Reservation reservation : response.getReservations()) {
+				for (Instance instance : reservation.getInstances()) {
+					publicIp = instance.getPublicIpAddress();
+					if (!Objects.equals(publicIp, "")) break;
+				}
+			}
+
+			if (publicIp == null) {
+				System.err.println("Wrong instance ID: " + instance_id);
+				return;
+			}
+
+			System.out.println("Instance Public IP: " + publicIp);
+
+			JSch jsch = new JSch();
+			jsch.addIdentity(keyPath);
+
+			Session session = jsch.getSession(user, publicIp, 22);
+			session.setConfig("StrictHostKeyChecking", "no");
+			session.connect();
+
+			System.out.println("VM 연결 성공: " + publicIp);
+
+			ChannelExec channel = (ChannelExec) session.openChannel("exec");
+			channel.setCommand(command);
+
+			InputStream input = channel.getInputStream();
+
+			channel.connect();
+
+			byte[] buffer = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = input.read(buffer)) != -1) {
+				System.out.print(new String(buffer, 0, bytesRead));
+			}
+
+			if (channel.isClosed()) {
+				System.out.println("\nExit status: " + channel.getExitStatus());
+			}
+
+			channel.disconnect();
+			session.disconnect();
+			System.out.println("Disconnected from EC2 instance.");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void sendCommand(String instance_id, String command) {
+		String user = "ec2-user";
+		String keyPath = "jrcloud.pem";
 
 		final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
 
