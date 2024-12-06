@@ -14,3 +14,4 @@
 9. check condor status - condor_status 명령어 실행
 10. send command - 지정 명령어 실행
 11. list security group - 보안 그룹 목록 출력
+12. create complete instance - 인스턴스 이름, 보안 그룹, 키 페어 지정하여 인스턴스 생성
