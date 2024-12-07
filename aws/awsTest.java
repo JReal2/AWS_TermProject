@@ -63,7 +63,7 @@ public class awsTest {
 			System.out.println("  7. reboot instance              8. list images                ");
 			System.out.println("  9. check condor status         10. send command               ");
 			System.out.println(" 11. list security group         12. create complete instance   ");
-			System.out.println(" 13. create several instances       ");
+			System.out.println(" 13. create several instances    14. delete instance            ");
 			System.out.println("                                 99. quit                       ");
 			System.out.println("----------------------------------------------------------------");
 
@@ -201,6 +201,15 @@ public class awsTest {
 						}
 					}
 				}
+				break;
+
+			case 14:
+				System.out.print("Enter instance id: ");
+				if(id_string.hasNext())
+					instance_id = id_string.nextLine();
+
+				if(!instance_id.trim().isEmpty())
+					deleteInstance(instance_id);
 				break;
 
 			case 99:
@@ -596,6 +605,27 @@ public class awsTest {
 			System.out.printf(
 					"Successfully started EC2 instance %s based on AMI %s",
 					reservation_id, ami_id);
+		}
+	}
+
+	public static void deleteInstance(String instance_id) {
+		final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+
+		try {
+			TerminateInstancesRequest request = new TerminateInstancesRequest()
+					.withInstanceIds(instance_id);
+
+			TerminateInstancesResult result = ec2.terminateInstances(request);
+			result.getTerminatingInstances().forEach(instance -> {
+				System.out.printf(
+						"Instance ID: %s is now in %s state%n",
+						instance.getInstanceId(),
+						instance.getCurrentState().getName()
+				);
+			});
+		} catch(Exception e)
+		{
+			System.out.println("Exception: "+e.toString());
 		}
 	}
 }
