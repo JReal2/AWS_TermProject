@@ -63,6 +63,7 @@ public class awsTest {
 			System.out.println("  7. reboot instance              8. list images                ");
 			System.out.println("  9. check condor status         10. send command               ");
 			System.out.println(" 11. list security group         12. create complete instance   ");
+			System.out.println(" 13. create several instances       ");
 			System.out.println("                                 99. quit                       ");
 			System.out.println("----------------------------------------------------------------");
 
@@ -175,6 +176,29 @@ public class awsTest {
 
 						if(!securityGroup_id.trim().isEmpty())
 							createCompleteInstance(ami_id2, instance_name, securityGroup_id);
+					}
+				}
+				break;
+
+			case 13:
+				System.out.print("Enter ami id: ");
+				String ami_id3 = "";
+				if(id_string.hasNext())
+					ami_id3 = id_string.nextLine();
+
+				if(!ami_id3.trim().isEmpty()) {
+					System.out.print("Enter instance name: ");
+					String instance_name = id_string.nextLine();
+
+					if(!instance_name.trim().isEmpty()) {
+						System.out.print("Enter security group id: ");
+						String securityGroup_id = id_string.nextLine();
+
+						if(!securityGroup_id.trim().isEmpty()) {
+							System.out.print("Enter instance number: ");
+							Integer instance_number = Integer.valueOf(id_string.nextLine());
+							createSeveralInstances(ami_id3, instance_name, securityGroup_id, instance_number);
+						}
 					}
 				}
 				break;
@@ -548,5 +572,30 @@ public class awsTest {
 		System.out.printf(
 				"Successfully started EC2 instance %s based on AMI %s",
 				reservation_id, ami_id);
+	}
+
+	public static void createSeveralInstances(String ami_id, String instance_name, String securityGroup_id, Integer instance_number) {
+		final AmazonEC2 ec2 = AmazonEC2ClientBuilder.defaultClient();
+
+		for(int i = 0; i < instance_number; i++) {
+			RunInstancesRequest run_request = new RunInstancesRequest()
+					.withImageId(ami_id)
+					.withInstanceType(InstanceType.T2Micro)
+					.withKeyName("jrcloud")
+					.withMaxCount(1)
+					.withMinCount(1)
+					.withSecurityGroupIds(securityGroup_id)
+					.withTagSpecifications(Collections.singletonList(new TagSpecification()
+							.withResourceType(ResourceType.Instance)
+							.withTags(new Tag("Name", instance_name + i))));
+
+			RunInstancesResult run_response = ec2.runInstances(run_request);
+
+			String reservation_id = run_response.getReservation().getInstances().get(0).getInstanceId();
+
+			System.out.printf(
+					"Successfully started EC2 instance %s based on AMI %s",
+					reservation_id, ami_id);
+		}
 	}
 }
