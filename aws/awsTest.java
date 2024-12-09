@@ -64,6 +64,7 @@ public class awsTest {
 			System.out.println("  9. check condor status         10. send command               ");
 			System.out.println(" 11. list security group         12. create complete instance   ");
 			System.out.println(" 13. create several instances    14. terminate instance         ");
+			System.out.println(" 15. list instance with name                                    ");
 			System.out.println("                                 99. quit                       ");
 			System.out.println("----------------------------------------------------------------");
 
@@ -210,6 +211,10 @@ public class awsTest {
 
 				if(!instance_id.trim().isEmpty())
 					deleteInstance(instance_id);
+				break;
+
+			case 15:
+				listInstancesWithName();
 				break;
 
 			case 99:
@@ -626,6 +631,49 @@ public class awsTest {
 		} catch(Exception e)
 		{
 			System.out.println("Exception: "+e.toString());
+		}
+	}
+
+	public static void listInstancesWithName() {
+
+		System.out.println("Listing instances....");
+		boolean done = false;
+
+		DescribeInstancesRequest request = new DescribeInstancesRequest();
+
+		while(!done) {
+			DescribeInstancesResult response = ec2.describeInstances(request);
+
+			for(Reservation reservation : response.getReservations()) {
+				for(Instance instance : reservation.getInstances()) {
+					String instance_name = "";
+
+					for(Tag tag : instance.getTags()) {
+						if("Name".equals(tag.getKey())) {
+							instance_name = tag.getValue();
+						}
+					}
+
+					System.out.printf(
+							"[name] %s, " +
+							"[id] %s, " +
+							"[AMI] %s, " +
+							"[type] %s, " +
+							"[state] %10s, ",
+							instance_name,
+							instance.getInstanceId(),
+							instance.getImageId(),
+							instance.getInstanceType(),
+							instance.getState().getName());
+				}
+				System.out.println();
+			}
+
+			request.setNextToken(response.getNextToken());
+
+			if(response.getNextToken() == null) {
+				done = true;
+			}
 		}
 	}
 }
