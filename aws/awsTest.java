@@ -63,7 +63,7 @@ public class awsTest {
 			System.out.println("  7. reboot instance              8. list images                ");
 			System.out.println("  9. check condor status         10. send command               ");
 			System.out.println(" 11. list security group         12. create complete instance   ");
-			System.out.println(" 13. create several instances    14. delete instance            ");
+			System.out.println(" 13. create several instances    14. terminate instance         ");
 			System.out.println("                                 99. quit                       ");
 			System.out.println("----------------------------------------------------------------");
 
