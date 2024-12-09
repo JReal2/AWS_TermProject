@@ -17,3 +17,4 @@
 12. create complete instance - 인스턴스 이름, 보안 그룹, 키 페어 지정하여 인스턴스 생성
 13. create several instances - 지정 수의 인스턴스 생성
 14. terminate instance - 인스턴스 삭제
+15. list instance with name - 인스턴스 목록 출력에 인스턴스 이름 추가
