@@ -1,4 +1,4 @@
-# 2024 Cloud Computing Term Project <br><br> - AWS 동적 관리 프로그램 - 
+# 2024 Cloud Computing Term Project <br><br> - AWS 동적 관리 프로그램 - (-5)
 
 ## 기본 메뉴 구성
 1. list instance -  인스턴스 목록 출력
